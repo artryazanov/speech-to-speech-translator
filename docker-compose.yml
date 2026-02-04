@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  translator:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ./:/app/data
+    working_dir: /app/data
+    # Determine default command or keep it empty to allow user to pass args
+    # When running 'docker-compose run translator ...', this entrypoint in Dockerfile takes over.
