@@ -1,11 +1,13 @@
 # Speech-to-Speech Translator
 
-Transform your audio content into any language while preserving the original voice, emotion, and intonation. Powered by Google Gemini 2.5 Flash Native Audio.
+Transform your audio content into any language with high accuracy and natural-sounding speech. Powered by Google Gemini 2.5 Flash.
 
 ## 🚀 Features
 
-- **Native Audio Processing**: Uses Gemini 2.5 Flash for direct audio-to-audio translation without intermediate text steps.
-- **Voice & Emotion Preservation**: Keeps the original speaker's timbre and emotional delivery.
+- **Hybrid STT+TTS Pipeline**: Utilizes a robust two-step process:
+  1.  **Speech-to-Text & Translation**: Uses `gemini-2.5-flash` for high-accuracy transcription and translation.
+  2.  **Text-to-Speech**: Uses `gemini-2.5-flash-preview-tts` to generate natural-sounding speech in the target language.
+- **Natural Translation**: leveraging advanced TTS capabilities to maintain a natural audible flow.
 - **Timestamp Alignment**: Automatically syncs the translated speech duration to match the original video/audio.
 - **Smart Chunking**: Handles long files by intelligently splitting based on silence.
 - **Video Input Support**: Automatically extracts audio from video files (mp4, mov, mkv, etc.) for translation.
@@ -108,9 +110,9 @@ You can run the tool without installing dependencies on your host machine using 
 
 This project uses a modular "Service" pattern:
 
-- **Core Audio**: `pydub` handles splitting, merging, and effects.
-- **AI Engine**: `google-generativeai` interfaces with Gemini 2.5.
-- **Orchestrator**: Manages the pipeline of Chunk -> Translate -> Merge.
+- **Core Audio**: `pydub` handles splitting, merging, effects, and raw PCM containment.
+- **AI Engine**: `google-generativeai` interfaces with Gemini 2.5 Flash for translation and Gemini 2.5 Flash Preview for TTS.
+- **Orchestrator**: Manages the pipeline of Chunk -> STT -> TTS -> Merge.
 
 ## 📄 License
 

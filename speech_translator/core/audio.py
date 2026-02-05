@@ -100,27 +100,77 @@ class AudioProcessor:
     @staticmethod
     def speed_match(segment: AudioSegment, target_duration_sec: float) -> AudioSegment:
         """
-        Adjusts the speed of the segment to match target_duration_sec exactly.
-        Requires ffmpeg.
+        Adjusts the speed of the segment to match target_duration_sec exactly using ffmpeg's atempo filter.
+        This allows both high-quality slow-down and speed-up without pitch shifting.
         """
         current_duration_sec = len(segment) / 1000.0
-        if current_duration_sec == 0:
+        if current_duration_sec == 0 or target_duration_sec <= 0:
             return segment
 
         speed_factor = current_duration_sec / target_duration_sec
-        
-        # Avoid extreme speed changes that sound robotic/broken
-        if speed_factor < 0.5 or speed_factor > 2.0:
-            logger.warning(f"Speed change required ({speed_factor:.2f}x) is too extreme. clamping.")
+        logger.info(f"Applying speed correction: {current_duration_sec:.2f}s -> {target_duration_sec:.2f}s (Factor: {speed_factor:.2f}x)")
+
+        # Sanity check limits
+        if speed_factor < 0.25 or speed_factor > 4.0:
+            logger.warning(f"Speed change ({speed_factor:.2f}x) too extreme. Clamping to 0.5x - 2.0x for safety.")
             speed_factor = max(0.5, min(speed_factor, 2.0))
             
-        # pydub's speedup is simple but changes pitch? No, pydub doesn't support pitch-preserving speedup natively well without simple frame skipping.
-        # Actually pydub.effects.speedup does chunking.
-        # For high quality, we might prefer relying on Gemini's alignment, 
-        # but as a fallback, pydub speedup is okay for small adjustments.
-        try:
-             # pydub speedup minimizes pitch shift artifacts for small changes
-            return segment.speedup(playback_speed=speed_factor)
-        except Exception as e:
-            logger.warning(f"Could not apply speedup: {e}")
+        if abs(speed_factor - 1.0) < 0.01:
             return segment
+
+        import subprocess
+        import os
+        from speech_translator.config import Config
+
+        # Create temp files
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
+        temp_input = Config.TEMP_DIR / f"speed_input_{unique_id}.wav"
+        temp_output = Config.TEMP_DIR / f"speed_output_{unique_id}.wav"
+        
+        try:
+            segment.export(str(temp_input), format="wav")
+            
+            # Construct ffmpeg command
+            # atempo filter supports 0.5 to 2.0. Chain them for larger changes.
+            filter_str = ""
+            remaining_factor = speed_factor
+            
+            while remaining_factor > 2.0:
+                filter_str += "atempo=2.0,"
+                remaining_factor /= 2.0
+            while remaining_factor < 0.5:
+                filter_str += "atempo=0.5,"
+                remaining_factor /= 0.5
+            
+            filter_str += f"atempo={remaining_factor}"
+            
+            cmd = [
+                "ffmpeg", "-y",
+                "-i", str(temp_input),
+                "-filter:a", filter_str,
+                "-vn", # No video
+                str(temp_output)
+            ]
+            
+            # Run ffmpeg
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                logger.error(f"FFmpeg speedup failed: {result.stderr}")
+                return segment
+                
+            # Load result
+            if temp_output.exists():
+                processed_segment = AudioSegment.from_file(str(temp_output), format="wav")
+                return processed_segment
+            else:
+                logger.error("FFmpeg output file not found.")
+                return segment
+                
+        except Exception as e:
+            logger.error(f"Error in speed_match: {e}")
+            return segment
+        finally:
+            if temp_input.exists(): os.remove(temp_input)
+            if temp_output.exists(): os.remove(temp_output)
