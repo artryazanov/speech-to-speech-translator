@@ -1,12 +1,12 @@
 # Speech-to-Speech Translator
 
-Transform your audio content into any language with high accuracy and natural-sounding speech. Powered by Google Gemini 2.5 Flash.
+Transform your audio content into any language with high accuracy and natural-sounding speech. Powered by Google Gemini Models.
 
 ## 🚀 Features
 
 - **Hybrid STT+TTS Pipeline**: Utilizes a robust two-step process:
-  1.  **Speech-to-Text & Translation**: Uses `gemini-2.5-flash` for high-accuracy transcription and translation.
-  2.  **Text-to-Speech**: Uses `gemini-2.5-flash-preview-tts` to generate natural-sounding speech in the target language.
+  1.  **Speech-to-Text & Translation**: Uses `gemini-2.5-flash` (configurable) for high-accuracy transcription and translation.
+  2.  **Text-to-Speech**: Uses `gemini-2.5-flash-preview-tts` (configurable) to generate natural-sounding speech in the target language.
 - **Natural Translation**: leveraging advanced TTS capabilities to maintain a natural audible flow.
 - **Timestamp Alignment**: Automatically syncs the translated speech duration to match the original video/audio.
 - **Smart Chunking**: Handles long files by intelligently splitting based on silence.
@@ -47,6 +47,15 @@ Transform your audio content into any language with high accuracy and natural-so
       cp .env.example .env
       # Open .env and set GOOGLE_API_KEY=your_copied_key_here
       ```
+
+5. **(Optional) Configure Models:**
+
+   You can override the default models by setting environment variables in your `.env` file:
+
+   ```bash
+   THINKING_MODEL=gemini-2.5-flash
+   TTS_MODEL=gemini-2.5-flash-preview-tts
+   ```
 
 ## 🎙️ Usage
 
@@ -111,7 +120,7 @@ You can run the tool without installing dependencies on your host machine using 
 This project uses a modular "Service" pattern:
 
 - **Core Audio**: `pydub` handles splitting, merging, effects, and raw PCM containment.
-- **AI Engine**: `google-generativeai` interfaces with Gemini 2.5 Flash for translation and Gemini 2.5 Flash Preview for TTS.
+- **AI Engine**: `google-generativeai` interfaces with Gemini Models for translation and TTS.
 - **Orchestrator**: Manages the pipeline of Chunk -> STT -> TTS -> Merge.
 
 ## 📄 License
