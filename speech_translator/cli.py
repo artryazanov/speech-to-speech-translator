@@ -15,6 +15,7 @@ def translate(
     target_lang: str = typer.Option(..., "--lang", "-l", help="Target language (e.g., 'English', 'Spanish')."),
     output_path: Path = typer.Option("output.mp3", "--output", "-o", help="Path to save the translated audio."),
     ducking: bool = typer.Option(False, "--ducking", "-d", help="Apply auto-ducking to mix translated voice with original background."),
+    voice: str = typer.Option("Kore", "--voice", help="TTS Voice (Puck, Charon, Kore, Fenrir, Aoede)"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging.")
 ):
     """
@@ -34,12 +35,18 @@ def translate(
         # Validate Config
         Config.validate()
         
+        # Validate Voice
+        allowed_voices = ["Puck", "Charon", "Kore", "Fenrir", "Aoede"]
+        if voice not in allowed_voices:
+            typer.secho(f"Warning: '{voice}' is not a standard voice. Allowed: {allowed_voices}. Proceeding anyway...", fg=typer.colors.YELLOW)
+
         orchestrator = TranslationOrchestrator()
         orchestrator.process(
             input_path=str(input_path),
             output_path=str(output_path),
             target_lang=target_lang,
-            ducking=ducking
+            ducking=ducking,
+            voice_name=voice
         )
         
         typer.secho(f"Success! Translation saved to {output_path}", fg=typer.colors.GREEN, bold=True)

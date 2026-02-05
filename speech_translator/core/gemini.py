@@ -27,7 +27,8 @@ class GeminiClient:
     def translate_audio(self, 
                        audio_file_path: str, 
                        target_lang: str, 
-                       duration_hint_sec: Optional[float] = None) -> bytes:
+                       duration_hint_sec: Optional[float] = None,
+                       voice_name: str = "Kore") -> bytes:
         """
         Two-step translation:
         1. Audio -> Translated Text (using standard Flash model)
@@ -70,15 +71,14 @@ class GeminiClient:
             raise
 
         # --- Step 2: Generate audio (TTS) ---
-        logger.info("Step 2: Generating speech from text...")
+        logger.info(f"Step 2: Generating speech from text using voice '{voice_name}'...")
         
         try:
             # Voice configuration (can be 'Puck', 'Kore', 'Fenrir', etc.)
-            # For Russian, the choice might be limited; the model will select the optimal one.
             speech_config = types.SpeechConfig(
                 voice_config=types.VoiceConfig(
                     prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                        voice_name="Kore" 
+                        voice_name=voice_name 
                     )
                 )
             )

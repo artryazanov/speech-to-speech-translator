@@ -14,7 +14,7 @@ class TranslationOrchestrator:
         self.audio_processor = AudioProcessor()
         self.gemini_client = GeminiClient()
 
-    def process(self, input_path: str, output_path: str, target_lang: str, ducking: bool = False):
+    def process(self, input_path: str, output_path: str, target_lang: str, ducking: bool = False, voice_name: str = "Kore"):
         """
         Main pipeline: Load -> Split -> Translate -> Merge -> (Broadcast/Duck) -> Save.
         """
@@ -75,7 +75,8 @@ class TranslationOrchestrator:
                         translated_bytes = self.gemini_client.translate_audio(
                             str(temp_chunk_path), 
                             target_lang, 
-                            duration_hint_sec=chunk_duration
+                            duration_hint_sec=chunk_duration,
+                            voice_name=voice_name
                         )
                         
                         # Write response to temp file to load back into pydub
