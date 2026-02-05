@@ -1,4 +1,5 @@
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import logging
 from pathlib import Path
 from typing import Optional
@@ -9,19 +10,8 @@ logger = logging.getLogger(__name__)
 class GeminiClient:
     def __init__(self):
         Config.validate()
-        genai.configure(api_key=Config.GOOGLE_API_KEY)
-        self.model = genai.GenerativeModel(Config.DEFAULT_MODEL_NAME)
-
-    def upload_file(self, path: str):
-        """Uploads a file to Gemini context."""
-        logger.info(f"Uploading file {path} to Gemini...")
-        try:
-            sample_file = genai.upload_file(path=path)
-            logger.info(f"File uploaded as: {sample_file.uri}")
-            return sample_file
-        except Exception as e:
-            logger.error(f"Upload failed: {e}")
-            raise
+        self.client = genai.Client(api_key=Config.GOOGLE_API_KEY)
+        self.model_name = Config.DEFAULT_MODEL_NAME
 
     def translate_audio(self, 
                        audio_file_path: str, 
@@ -32,13 +22,22 @@ class GeminiClient:
         Returns the raw audio bytes of the response.
         """
         
-        # Upload the file first
-        remote_file = self.upload_file(audio_file_path)
+        # Read file content directly as bytes usually works better for simple scripts 
+        # than managing uploads unless files are huge. But for S2S, uploads are safer.
+        # The new SDK handles local file paths seamlessly in generate_content for some cases,
+        # but let's stick to the official pattern or simple bytes if supported.
+        # Actually, new SDK allows passing file path directly if using the File API equivalent,
+        # or we can just read bytes.
         
+        # Let's read the file as bytes for simplicity and reliability with the new SDK
+        # if the file is small enough (chunks are small).
+        with open(audio_file_path, "rb") as f:
+            audio_bytes = f.read()
+            
         prompt_parts = [
             f"Translate this speech to {target_lang}.",
             "INSTRUCTIONS:",
-            "1. Output ONLY the translated audio file.",
+            "1. Output ONLY the translated audio.",
             "2. PRESERVE the original voice, tone, emotion, and speaker identity exactly.",
             "3. Do not add background music or sound effects, only the voice.",
         ]
@@ -52,20 +51,44 @@ class GeminiClient:
         logger.info(f"Requesting translation to {target_lang} with duration hint: {duration_hint_sec}")
         
         try:
-            response = self.model.generate_content(
-                [prompt, remote_file],
-                generation_config={"response_mime_type": "audio/mpeg"}
+            # New SDK call structure
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=[
+                    types.Content(
+                        parts=[
+                            types.Part.from_bytes(data=audio_bytes, mime_type="audio/mpeg"),
+                            types.Part.from_text(text=prompt)
+                        ]
+                    )
+                ],
+                config=types.GenerateContentConfig(
+                    response_modalities=["AUDIO"]
+                )
             )
             
-            # Check for parts
+            # Extract audio from response
             if not response.candidates:
+                logger.error("No candidates returned from Gemini.")
+                logger.error(f"Response feedback: {response.prompt_feedback}")
                 raise ValueError("No candidates returned from Gemini.")
-            
-            part = response.candidates[0].content.parts[0]
-            if not part.inline_data:
-                raise ValueError("No inline audio data in response.")
                 
-            return part.inline_data.data
+            for part in response.candidates[0].content.parts:
+                if part.inline_data:
+                    return part.inline_data.data
+            
+            # Log the text content if audio is missing to understand why
+            text_content = ""
+            for part in response.candidates[0].content.parts:
+                if part.text:
+                    text_content += part.text
+            
+            logger.error("No inline audio data found in response.")
+            logger.error(f"Finish Reason: {response.candidates[0].finish_reason}")
+            logger.error(f"Safety Ratings: {response.candidates[0].safety_ratings}")
+            logger.error(f"Text Content (if any): {text_content}")
+            
+            raise ValueError(f"No inline audio data found. Model said: {text_content[:200]}...")
             
         except Exception as e:
             logger.error(f"Translation failed: {e}")

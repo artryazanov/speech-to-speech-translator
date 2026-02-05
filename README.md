@@ -9,6 +9,7 @@ Transform your audio content into any language while preserving the original voi
 - **Timestamp Alignment**: Automatically syncs the translated speech duration to match the original video/audio.
 - **Smart Chunking**: Handles long files by intelligently splitting based on silence.
 - **Video Input Support**: Automatically extracts audio from video files (mp4, mov, mkv, etc.) for translation.
+- **YouTube Support**: Download and translate audio directly from YouTube URL.
 - **Audio Ducking**: (Optional) Mixes the translated voice with the original background audio.
 
 ## 📥 Installation
@@ -51,13 +52,18 @@ Transform your audio content into any language while preserving the original voi
 
 Translate a file to English:
 ```bash
-python -m speech_translator.cli translate input.mp3 --lang "English" --output output.mp3
+python -m speech_translator.cli input.mp3 --lang "English" --output output.mp3
+```
+
+Translate a YouTube video:
+```bash
+python -m speech_translator.cli "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --lang "French"
 ```
 
 ### Advanced Options
 
 ```bash
-python -m speech_translator.cli translate input.mp3 \
+python -m speech_translator.cli input.mp3 \
   --lang "Spanish" \
   --output result.mp3 \
   --ducking \
@@ -78,6 +84,11 @@ You can run the tool without installing dependencies on your host machine using 
    docker compose run --rm translator translate input.mp3 --lang "English" --output output.mp3
    ```
    *Note: The current directory is mounted to `/app/data` inside the container, so input and output files are read/written directly to your host folder.*
+
+3. **Translate a YouTube video**:
+   ```bash
+   docker compose run --rm translator "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --lang "French" --output youtube_audio.mp3
+   ```
 
 ## 🏗️ Architecture
 

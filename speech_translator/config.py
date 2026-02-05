@@ -9,7 +9,7 @@ class Config:
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     
     # Defaults
-    DEFAULT_MODEL_NAME = "gemini-2.5-flash"
+    DEFAULT_MODEL_NAME = "gemini-exp-1206"
     TEMP_DIR = Path("temp_audio")
     
     @classmethod

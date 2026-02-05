@@ -10,7 +10,7 @@ app = typer.Typer(help="Speech-to-Speech Translator using Gemini 2.5")
 
 @app.command()
 def translate(
-    input_path: Path = typer.Argument(..., exists=True, help="Path to the input audio (mp3, wav) or video (mp4, mov, mkv) file."),
+    input_path: str = typer.Argument(..., help="Path to the input audio/video file OR a YouTube URL."),
     target_lang: str = typer.Option(..., "--lang", "-l", help="Target language (e.g., 'English', 'Spanish')."),
     output_path: Path = typer.Option("output.mp3", "--output", "-o", help="Path to save the translated audio."),
     ducking: bool = typer.Option(False, "--ducking", "-d", help="Apply auto-ducking to mix translated voice with original background."),
