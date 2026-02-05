@@ -16,9 +16,9 @@ class GeminiClient:
             http_options={'api_version': Config.GEMINI_API_VERSION}
         )
         # Model for text understanding and translation (STT + Translation)
-        self.thinking_model = "gemini-2.5-flash" 
+        self.thinking_model = Config.THINKING_MODEL
         # Model for speech generation (TTS)
-        self.tts_model = "gemini-2.5-flash-preview-tts"
+        self.tts_model = Config.TTS_MODEL
 
     def list_models(self):
         """Lists available models from the Gemini API."""

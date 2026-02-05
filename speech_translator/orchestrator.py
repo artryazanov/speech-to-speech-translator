@@ -169,16 +169,10 @@ class TranslationOrchestrator:
                 
                 # Cleanup temp files
                 if temp_chunk_path.exists(): os.remove(temp_chunk_path)
-                if temp_chunk_path.exists(): os.remove(temp_chunk_path)
                 # Cleanup potential temp files with different extensions
                 for ext in [".mp3", ".wav"]:
                     temp_translated_path = Config.TEMP_DIR / f"translated_chunk_{i}{ext}"
                     if temp_translated_path.exists(): os.remove(temp_translated_path)
-
-                # Rate Limiting for Experimental Models (Preventative)
-                if i < len(chunks) - 1 and translated_chunk_success:
-                    logger.info("Sleeping 40s to respect rate limits (2 RPM)...")
-                    time.sleep(40)
 
             # 3. Merge
             logger.info("Merging processed segments...")
@@ -187,7 +181,7 @@ class TranslationOrchestrator:
             # 4. Post-processing (Ducking)
             if ducking:
                 logger.info("Applying audio ducking...")
-                # We need the original full audio again for the base
+                # We need the original full audio again, for the base
                 # Ducking requires the original track (background) + new voice
                 final_output = self.audio_processor.apply_ducking(original_audio, final_voice)
             else:

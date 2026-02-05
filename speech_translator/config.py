@@ -9,7 +9,8 @@ class Config:
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     
     # Defaults with env overrides
-    DEFAULT_MODEL_NAME = os.getenv("DEFAULT_MODEL_NAME", "gemini-exp-1206")
+    THINKING_MODEL = os.getenv("THINKING_MODEL", "gemini-3-pro-preview")
+    TTS_MODEL = os.getenv("TTS_MODEL", "gemini-2.5-pro-preview-tts")
     GEMINI_API_VERSION = os.getenv("GEMINI_API_VERSION", "v1beta")
     TEMP_DIR = Path(os.getenv("TEMP_DIR", "temp_audio"))
     
