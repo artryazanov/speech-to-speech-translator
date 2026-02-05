@@ -16,6 +16,12 @@ class GeminiClient:
         )
         self.model_name = Config.DEFAULT_MODEL_NAME
 
+    def list_models(self):
+        """
+        Lists available models from the Gemini API.
+        """
+        return self.client.models.list()
+
     def translate_audio(self, 
                        audio_file_path: str, 
                        target_lang: str, 

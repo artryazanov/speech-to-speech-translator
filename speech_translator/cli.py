@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Optional
 from speech_translator.orchestrator import TranslationOrchestrator
 from speech_translator.config import Config
+from speech_translator.core.gemini import GeminiClient
 
 app = typer.Typer(help="Speech-to-Speech Translator using Gemini 2.5")
 
@@ -50,6 +51,24 @@ def translate(
         typer.secho(f"An error occurred: {e}", fg=typer.colors.RED)
         if verbose:
             logger.exception("Traceback:")
+        raise typer.Exit(code=1)
+
+@app.command(name="list-models")
+def list_models():
+    """
+    Lists all available Gemini models.
+    """
+    try:
+        Config.validate()
+        client = GeminiClient()
+        models = client.list_models()
+        
+        typer.secho("Available Gemini Models:", fg=typer.colors.BLUE, bold=True)
+        for model in models:
+            typer.echo(f"- {model.name} ({model.display_name})")
+            
+    except Exception as e:
+        typer.secho(f"Error listing models: {e}", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
 if __name__ == "__main__":

@@ -60,6 +60,14 @@ Translate a YouTube video:
 python -m speech_translator.cli "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --lang "French"
 ```
 
+
+### List Available Models
+
+To see all available Gemini models:
+```bash
+python -m speech_translator.cli list-models
+```
+
 ### Advanced Options
 
 ```bash
@@ -87,8 +95,14 @@ You can run the tool without installing dependencies on your host machine using 
 
 3. **Translate a YouTube video**:
    ```bash
-   docker compose run --rm translator "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --lang "French" --output youtube_audio.mp3
+   docker compose run --rm translator translate "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --lang "French" --output youtube_audio.mp3
    ```
+
+4. **List available models**:
+   ```bash
+    docker compose run --rm translator list-models
+   ```
+
 
 ## 🏗️ Architecture
 
