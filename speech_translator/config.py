@@ -8,9 +8,10 @@ load_dotenv()
 class Config:
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     
-    # Defaults
-    DEFAULT_MODEL_NAME = "gemini-exp-1206"
-    TEMP_DIR = Path("temp_audio")
+    # Defaults with env overrides
+    DEFAULT_MODEL_NAME = os.getenv("DEFAULT_MODEL_NAME", "gemini-exp-1206")
+    GEMINI_API_VERSION = os.getenv("GEMINI_API_VERSION", "v1beta")
+    TEMP_DIR = Path(os.getenv("TEMP_DIR", "temp_audio"))
     
     @classmethod
     def validate(cls):

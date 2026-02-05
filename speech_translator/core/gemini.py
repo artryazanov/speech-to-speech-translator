@@ -10,7 +10,10 @@ logger = logging.getLogger(__name__)
 class GeminiClient:
     def __init__(self):
         Config.validate()
-        self.client = genai.Client(api_key=Config.GOOGLE_API_KEY)
+        self.client = genai.Client(
+            api_key=Config.GOOGLE_API_KEY,
+            http_options={'api_version': Config.GEMINI_API_VERSION}
+        )
         self.model_name = Config.DEFAULT_MODEL_NAME
 
     def translate_audio(self, 
