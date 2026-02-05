@@ -40,6 +40,7 @@ MANIFEST
 
 # Project specifics
 *.mp3
+*.mp4
 *.wav
 temp_chunk_*.mp3
 translated_*.mp3

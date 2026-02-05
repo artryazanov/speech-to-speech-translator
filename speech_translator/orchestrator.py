@@ -18,29 +18,42 @@ class TranslationOrchestrator:
         """
         Main pipeline: Load -> Split -> Translate -> Merge -> (Broadcast/Duck) -> Save.
         """
+        # Determine output format and need for video early
+        is_video_output = Path(output_path).suffix.lower() in [".mp4", ".mov", ".mkv", ".avi", ".webm"]
+        
         # Determine if input is URL or File
         is_url = input_path.startswith("http://") or input_path.startswith("https://")
         downloaded_temp_file = None
+        original_video_path = None # Track original video for dubbing
 
         if is_url:
             logger.info("URL detected. Initiating download...")
             try:
-                downloaded_temp_file = download_content(input_path, Config.TEMP_DIR)
+                # If output is video, try to download video source
+                downloaded_temp_file = download_content(input_path, Config.TEMP_DIR, prefer_video=is_video_output)
                 input_file = downloaded_temp_file
+                # YouTube downloads are usually video (webm/mp4) or audio (m4a/mp3). 
+                # If it's a video container, we can use it for dubbing.
+                if input_file.suffix.lower() in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
+                    original_video_path = str(input_file)
             except Exception as e:
                 raise RuntimeError(f"Could not download content from URL: {e}")
         else:
             input_file = Path(input_path)
             if not input_file.exists():
                 raise FileNotFoundError(f"Input file not found: {input_path}")
+            
+            # Check if local input is video
+            if input_file.suffix.lower() in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
+                original_video_path = str(input_file)
 
         logger.info(f"Starting processing for {input_file}")
         
         try:
             # 1. Load Audio
             # Pydub automatically handles video files by extracting the audio track (using ffmpeg)
-            if input_file.suffix.lower() in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
-                logger.info(f"Video file detected: {input_file.name}. Extracting audio track...")
+            if original_video_path:
+                logger.info(f"Video file detected: {Path(original_video_path).name}. Extracting audio track...")
                 
             original_audio = self.audio_processor.load_audio(str(input_file))
             total_duration = len(original_audio) / 1000.0
@@ -132,7 +145,7 @@ class TranslationOrchestrator:
                         # Debug print to ensure code is running
                         print(f"DEBUG: Chunk {i} received {len(translated_bytes)} bytes.", flush=True)
                         print(f"DEBUG: Detected extension: {ext}", flush=True)
-                        print(f"DEBUG: Header (hex): {header_hex}", flush=True)
+                        # print(f"DEBUG: Header (hex): {header_hex}", flush=True)
 
                         if not locals().get("wrote_file_already", False):
                             temp_out_path = Config.TEMP_DIR / f"translated_chunk_{i}{ext}"
@@ -188,8 +201,44 @@ class TranslationOrchestrator:
                 final_output = final_voice
 
             # 5. Export
-            logger.info(f"Saving final output to {output_path}")
-            self.audio_processor.save_audio(final_output, output_path)
+            # (is_video_output was determined at start of method)
+            
+            if is_video_output and original_video_path:
+                logger.info(f"Output is video ({Path(output_path).name}) and original video available. Merging translated audio into video...")
+                
+                # We must first save the final audio to a temp file
+                temp_final_audio = Config.TEMP_DIR / "final_translated_audio.wav"
+                self.audio_processor.save_audio(final_output, str(temp_final_audio), format="wav")
+                
+                try:
+                    self.audio_processor.merge_video_audio(
+                        video_path=original_video_path,
+                        audio_path=str(temp_final_audio),
+                        output_path=output_path
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to merge video and audio: {e}")
+                    logger.warning("Falling back to saving audio only to ensure output is preserved.")
+                    # If fallback, we save as mp3 if original goal was video, or just use the name provided?
+                    # The name provided likely ends in .mp4. Saving audio to .mp4 is valid (audio-only mp4).
+                    # Or we can append .mp3. Let's try saving to the requested path first (audio only).
+                    try:
+                        self.audio_processor.save_audio(final_output, output_path)
+                        logger.info(f"Saved audio-only to {output_path}")
+                    except Exception as e2:
+                        fallback_path = str(output_path) + ".mp3"
+                        logger.error(f"Failed to save audio to original path: {e2}. Saving to {fallback_path}")
+                        self.audio_processor.save_audio(final_output, fallback_path)
+
+                finally:
+                    if temp_final_audio.exists():
+                        os.remove(temp_final_audio)
+            
+            else:
+                 # Standard audio export
+                 logger.info(f"Saving final output to {output_path}")
+                 self.audio_processor.save_audio(final_output, output_path)
+
             logger.info("Done!")
             
         finally:

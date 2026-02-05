@@ -4,16 +4,20 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-def download_content(url: str, output_dir: Path) -> Path:
+def download_content(url: str, output_dir: Path, prefer_video: bool = False) -> Path:
     """
-    Downloads audio from a given URL using yt-dlp.
+    Downloads content from a given URL using yt-dlp.
+    If prefer_video is True, attempts to download the best video+audio.
+    Otherwise, downloads best audio only.
     Returns the path to the downloaded file.
     """
-    logger.info(f"Downloading content from: {url}")
+    logger.info(f"Downloading content from: {url} (Video preferred: {prefer_video})")
     
-    # yt-dlp options: download best audio, save with title and ID
+    # yt-dlp options
+    format_selection = 'bestvideo+bestaudio/best' if prefer_video else 'bestaudio/best'
+    
     ydl_opts = {
-        'format': 'bestaudio/best',
+        'format': format_selection,
         'outtmpl': str(output_dir / '%(title)s [%(id)s].%(ext)s'),
         'noplaylist': True,
         'quiet': True,

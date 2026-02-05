@@ -61,16 +61,17 @@ Transform your audio content into any language with high accuracy and natural-so
 
 ### Zero-Config CLI
 
-Translate a file to English:
+Translate a file to English (Auto-detects audio/video):
 ```bash
-python -m speech_translator.cli input.mp3 --lang "English" --output output.mp3
+python -m speech_translator.cli input.mp3 --lang "English"
+# Output: input_translated.mp3
 ```
 
-Translate a YouTube video:
+Translate a YouTube video (Auto-dubs translated audio over video):
 ```bash
 python -m speech_translator.cli "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --lang "French"
+# Output: [Video Title] [VideoID]_translated.mp4
 ```
-
 
 ### List Available Models
 
@@ -82,9 +83,9 @@ python -m speech_translator.cli list-models
 ### Advanced Options
 
 ```bash
-python -m speech_translator.cli input.mp3 \
+python -m speech_translator.cli input.mp4 \
   --lang "Spanish" \
-  --output result.mp3 \
+  --output custom_audio.mp3 \
   --ducking \
 ```
 
@@ -100,13 +101,13 @@ You can run the tool without installing dependencies on your host machine using 
 2. **Run a translation**:
    Place your input file (e.g., `input.mp3`) in the project directory.
    ```bash
-   docker compose run --rm translator translate input.mp3 --lang "English" --output output.mp3
+   docker compose run --rm translator translate input.mp3 --lang "English"
    ```
    *Note: The current directory is mounted to `/app/data` inside the container, so input and output files are read/written directly to your host folder.*
 
 3. **Translate a YouTube video**:
    ```bash
-   docker compose run --rm translator translate "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --lang "French" --output youtube_audio.mp3
+   docker compose run --rm translator translate "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --lang "French"
    ```
 
 4. **List available models**:
