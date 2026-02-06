@@ -32,6 +32,8 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         
     - name: Run Tests
+      env:
+        GOOGLE_API_KEY: "dummy_test_key"
       run: |
         pytest
         
