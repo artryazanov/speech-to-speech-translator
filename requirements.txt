@@ -11,3 +11,4 @@ pytest-cov>=4.1.0
 
 flake8>=6.0.0
 mypy>=1.0.0
+pyaudioop; python_version >= "3.13"
