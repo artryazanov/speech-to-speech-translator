@@ -31,7 +31,7 @@ class GeminiClient:
                        voice_name: str = "Kore") -> bytes:
         """
         Two-step translation:
-        1. Audio -> Translated Text (using standard Flash model)
+        1. Audio -> Translated Text (using configured thinking model)
         2. Translated Text -> Audio (using TTS model)
         """
         

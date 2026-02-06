@@ -7,7 +7,7 @@ from speech_translator.orchestrator import TranslationOrchestrator
 from speech_translator.config import Config
 from speech_translator.core.gemini import GeminiClient
 
-app = typer.Typer(help="Speech-to-Speech Translator using Gemini 2.5")
+app = typer.Typer(help="Speech-to-Speech Translator using Gemini models")
 
 @app.command()
 def translate(
@@ -51,12 +51,8 @@ def translate(
             if input_lower.startswith("http://") or input_lower.startswith("https://"):
                 # Assume URLs (YouTube) are videos by default unless proven otherwise
                 is_video_input = True
-                # For URL, we can't easily guess the filename yet, so we'll let the orchestrator handle valid naming?
-                # Actually, orchestrator takes a string path. 
-                # CLI usually defines the output. 
-                # If URL, we default to "output_translated.mp4" if we can't guess name?
-                # Or better: derive from Orchestrator? No, Orchestrator expects output_path.
-                # Let's set a generic default for URL if not specified.
+                # Default to "downloaded_video" for URLs since filename inference
+                # happens later or is not guaranteed.
                 base_name = "downloaded_video"
             else:
                 input_p = Path(input_path)

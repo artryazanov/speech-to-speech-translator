@@ -58,10 +58,10 @@ class TranslationOrchestrator:
             original_audio = self.audio_processor.load_audio(str(input_file))
             total_duration = len(original_audio) / 1000.0
             
-            # 2. Strategy Decision: Split or One-shot?
-            # Gemini Flash 2.5 context is large, but for reliable timestamps and shorter failures, 
-            # chunks of ~30-60s are safer.
-            chunks_data = self.audio_processor.detect_speech_intervals(original_audio, target_chunk_len_sec=45)
+            # 2. Strategy Decision: Split into chunks
+            # The thinking model supports large context, but chunking ensures reliable timestamp alignment
+            # and granular error handling. Default chunk size is 300s (5 min).
+            chunks_data = self.audio_processor.detect_speech_intervals(original_audio)
             
             translated_segments_data = []
             
@@ -115,8 +115,7 @@ class TranslationOrchestrator:
                              ext = ".wav"
                              # Wrap raw PCM in WAV
                              # We'll create a new simplified bytes object with WAV header
-                             # But first lets just save it as .pcm for now and handle loading manually?
-                             # Better: Wrap it in WAV right here before saving.
+                             # Wrap raw PCM in WAV container immediately before saving to simplify loading.
                              
                              logger.info("Raw PCM detected, wrapping in WAV container...")
                              
@@ -131,8 +130,7 @@ class TranslationOrchestrator:
                                  wav_file.writeframes(translated_bytes)
                                  
                              # Modify temp_out_path to point to this new wav file
-                             # We skip the standard write below by setting a flag or just overwriting logic loop
-                             # Let's adjust logic flow:
+                             # Skip the standard write below by setting a flag since we handled it here.
                              temp_out_path = wav_path
                              ext = ".wav" # signal for logging
                              

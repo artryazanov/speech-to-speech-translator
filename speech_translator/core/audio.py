@@ -26,7 +26,7 @@ class AudioProcessor:
         audio: AudioSegment, 
         min_silence_len: int = 500, 
         silence_thresh_offset: int = -14, 
-        target_chunk_len_sec: int = 45
+        target_chunk_len_sec: int = 300
     ) -> List[dict]:
         """
         Detects speech intervals and groups them into chunks of approximately chunk_len_sec.
@@ -112,12 +112,9 @@ class AudioProcessor:
         Note: This implementation is simple. For 'true' ducking we would track 
         volume of voice_over over time. Here we assume constant ducking for the duration.
         """
-        # Lower the volume of the original track globally or specifically?
-        # A simple approach for this context: Make original quiet, overlay voice.
-        
-        # Ideally, we keep original volume where voice is silent. 
-        # But constructing that mask is complex. 
-        # "Simple Ducking": Lower original volume by X dB for the entire duration of the overlay.
+        # Strategy: "Simple Ducking"
+        # Reduce the volume of the original track by the threshold for the entire duration.
+        # This avoids complex masking while ensuring the voice-over is clearly audible.
         
         ducked_original = original - abs(threshold_db) # Reduce volume
         return ducked_original.overlay(voice_over)
