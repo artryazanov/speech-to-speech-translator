@@ -22,48 +22,73 @@ class AudioProcessor:
         segment.export(path, format=format)
 
     @staticmethod
-    def split_on_silence_smart(
+    def detect_speech_intervals(
         audio: AudioSegment, 
         min_silence_len: int = 500, 
         silence_thresh_offset: int = -14, 
-        keep_silence: int = 200,
         target_chunk_len_sec: int = 45
-    ) -> List[AudioSegment]:
+    ) -> List[dict]:
         """
-        Splits audio on silence but tries to group chunks to reach a target length 
-        to optimize for API context windows.
+        Detects speech intervals and groups them into chunks of approximately chunk_len_sec.
+        Returns a list of dictionaries: {'audio': AudioSegment, 'start': int (ms), 'end': int (ms)}
         """
-        logger.info("Analyzing silence and splitting audio...")
+        from pydub.silence import detect_nonsilent
+        
+        logger.info("Detecting speech intervals...")
         
         # Adjust silence threshold relative to the audio's dBFS
         silence_thresh = audio.dBFS + silence_thresh_offset
         
-        chunks = split_on_silence(
+        # detect_nonsilent returns list of [start, end] pairs in ms
+        nonsilent_ranges = detect_nonsilent(
             audio, 
             min_silence_len=min_silence_len,
-            silence_thresh=silence_thresh,
-            keep_silence=keep_silence
+            silence_thresh=silence_thresh
         )
 
-        if not chunks:
-            logger.warning("No silence found, returning original audio as single chunk.")
-            return [audio]
+        if not nonsilent_ranges:
+            logger.warning("No speech detected, returning original audio as single chunk.")
+            return [{'audio': audio, 'start': 0, 'end': len(audio)}]
 
         combined_chunks = []
-        current_chunk = chunks[0]
         
         target_len_ms = target_chunk_len_sec * 1000
-
-        for i in range(1, len(chunks)):
-            next_chunk = chunks[i]
-            if len(current_chunk) + len(next_chunk) < target_len_ms:
-                current_chunk += next_chunk
-            else:
-                combined_chunks.append(current_chunk)
-                current_chunk = next_chunk
         
-        combined_chunks.append(current_chunk)
-        logger.info(f"Audio split into {len(combined_chunks)} chunks.")
+        # Start with the first range
+        current_start, current_end = nonsilent_ranges[0]
+        
+        for i in range(1, len(nonsilent_ranges)):
+            next_start, next_end = nonsilent_ranges[i]
+            
+            # Calculate potential new length if we merge up to next_end
+            # We include the silence between current_end and next_start
+            potential_len = next_end - current_start
+            
+            if potential_len < target_len_ms:
+                # Merge: extend current endpoint
+                current_end = next_end
+            else:
+                # Commit current chunk
+                chunk_audio = audio[current_start:current_end]
+                combined_chunks.append({
+                    'audio': chunk_audio, 
+                    'start': current_start,
+                    'end': current_end
+                })
+                
+                # Start new chunk
+                current_start = next_start
+                current_end = next_end
+        
+        # Append the final chunk
+        chunk_audio = audio[current_start:current_end]
+        combined_chunks.append({
+            'audio': chunk_audio, 
+            'start': current_start,
+            'end': current_end
+        })
+        
+        logger.info(f"Audio split into {len(combined_chunks)} intervals/chunks.")
         return combined_chunks
 
     @staticmethod

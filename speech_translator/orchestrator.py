@@ -61,13 +61,15 @@ class TranslationOrchestrator:
             # 2. Strategy Decision: Split or One-shot?
             # Gemini Flash 2.5 context is large, but for reliable timestamps and shorter failures, 
             # chunks of ~30-60s are safer.
-            chunks = self.audio_processor.split_on_silence_smart(original_audio, target_chunk_len_sec=45)
+            chunks_data = self.audio_processor.detect_speech_intervals(original_audio, target_chunk_len_sec=45)
             
-            translated_segments = []
+            translated_segments_data = []
             
-            for i, chunk in enumerate(chunks):
+            for i, chunk_info in enumerate(chunks_data):
+                chunk = chunk_info['audio']
+                chunk_start = chunk_info['start']
                 chunk_duration = len(chunk) / 1000.0
-                logger.info(f"Processing chunk {i+1}/{len(chunks)} ({chunk_duration:.2f}s)...")
+                logger.info(f"Processing chunk {i+1}/{len(chunks_data)} ({chunk_duration:.2f}s)...")
                 
                 # Save temp chunk
                 temp_chunk_path = Config.TEMP_DIR / f"temp_chunk_{i}.mp3"
@@ -161,7 +163,10 @@ class TranslationOrchestrator:
                             logger.warning(f"Drift detected in chunk {i}: target {chunk_duration}s, got {actual_duration}s. Attempting speed correction.")
                             translated_segment = self.audio_processor.speed_match(translated_segment, chunk_duration)
                         
-                        translated_segments.append(translated_segment)
+                        translated_segments_data.append({
+                            'audio': translated_segment,
+                            'start': chunk_start
+                        })
                         translated_chunk_success = True
                         break # Success, exit retry loop
                         
@@ -178,7 +183,10 @@ class TranslationOrchestrator:
                         if attempt == max_retries - 1:
                             # Final failure
                             logger.error("Inserting silence for failed chunk to maintain sync.")
-                            translated_segments.append(AudioSegment.silent(duration=len(chunk)))
+                            translated_segments_data.append({
+                                'audio': AudioSegment.silent(duration=len(chunk)),
+                                'start': chunk_start
+                            })
                 
                 # Cleanup temp files
                 if temp_chunk_path.exists(): os.remove(temp_chunk_path)
@@ -187,9 +195,14 @@ class TranslationOrchestrator:
                     temp_translated_path = Config.TEMP_DIR / f"translated_chunk_{i}{ext}"
                     if temp_translated_path.exists(): os.remove(temp_translated_path)
 
-            # 3. Merge
-            logger.info("Merging processed segments...")
-            final_voice = self.audio_processor.merge_segments(translated_segments)
+            # 3. Merge (Overlay on timeline)
+            logger.info("Merging processed segments onto timeline...")
+            
+            # Create a silent track of the total duration
+            final_voice = AudioSegment.silent(duration=int(total_duration * 1000))
+            
+            for seg_data in translated_segments_data:
+                final_voice = final_voice.overlay(seg_data['audio'], position=seg_data['start'])
             
             # 4. Post-processing (Ducking)
             if ducking:
