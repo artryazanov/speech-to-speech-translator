@@ -35,7 +35,13 @@ jobs:
       env:
         GOOGLE_API_KEY: "dummy_test_key"
       run: |
-        pytest
+        pytest --cov=speech_translator --cov-report=xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: artryazanov/speech-to-speech-translator
         
   lint:
     runs-on: ubuntu-latest
