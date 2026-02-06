@@ -42,5 +42,6 @@ MANIFEST
 *.mp3
 *.mp4
 *.wav
+*.webm
 temp_chunk_*.mp3
 translated_*.mp3

@@ -41,6 +41,7 @@ class GeminiClient:
 
         prompt_text = (
             f"Listen to this audio and translate the spoken content into {target_lang}. "
+            f"Try to keep the speech duration close to {duration_hint_sec:.1f} seconds. "
             "Output ONLY the translated text without any explanations, quotes, or timestamps."
         )
 

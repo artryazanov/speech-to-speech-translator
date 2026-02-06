@@ -22,6 +22,22 @@ class AudioProcessor:
         segment.export(path, format=format)
 
     @staticmethod
+    def trim_silence(audio: AudioSegment, silence_threshold: float = -50.0, chunk_size: int = 10) -> AudioSegment:
+        """Removes silence from the beginning and end of the audio."""
+        def detect_leading_silence(sound, silence_threshold, chunk_size):
+            trim_ms = 0
+            while trim_ms < len(sound) and sound[trim_ms:trim_ms+chunk_size].dBFS < silence_threshold:
+                trim_ms += chunk_size
+            return trim_ms
+
+        start_trim = detect_leading_silence(audio, silence_threshold, chunk_size)
+        end_trim = detect_leading_silence(audio.reverse(), silence_threshold, chunk_size)
+        
+        duration = len(audio)
+        trimmed_sound = audio[start_trim:duration-end_trim]
+        return trimmed_sound
+
+    @staticmethod
     def detect_speech_intervals(
         audio: AudioSegment, 
         min_silence_len: int = 500, 

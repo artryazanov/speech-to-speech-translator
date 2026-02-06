@@ -154,10 +154,13 @@ class TranslationOrchestrator:
                         
                         translated_segment = self.audio_processor.load_audio(str(temp_out_path))
                         
+                        # Trim silence to improve sync
+                        translated_segment = self.audio_processor.trim_silence(translated_segment)
+                        
                         # Check Duration & Adjust if strictly needed (simple fallback)
                         actual_duration = len(translated_segment) / 1000.0
                         diff = abs(actual_duration - chunk_duration)
-                        if diff > 1.0: # If more than 1 second off
+                        if diff > 0.2: # Drift threshold reduced to 0.2s for tighter sync
                             logger.warning(f"Drift detected in chunk {i}: target {chunk_duration}s, got {actual_duration}s. Attempting speed correction.")
                             translated_segment = self.audio_processor.speed_match(translated_segment, chunk_duration)
                         
