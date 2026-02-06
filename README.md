@@ -2,11 +2,14 @@
 
 Transform your audio content into any language with high accuracy and natural-sounding speech. Powered by Google Gemini Models.
 
+> [!WARNING]
+> **Single Speaker Only**: This project is currently optimized for videos with a single speaker. Multi-speaker support with distinct voice assignment is experimental and may produce unexpected results.
+
 ## 🚀 Features
 
 - **Hybrid STT+TTS Pipeline**: Utilizes a robust two-step process:
-  1.  **Speech-to-Text & Translation**: Uses `gemini-2.5-flash` (configurable) for high-accuracy transcription and translation.
-  2.  **Text-to-Speech**: Uses `gemini-2.5-flash-preview-tts` (configurable) to generate natural-sounding speech in the target language.
+  1.  **Speech-to-Text & Translation**: Uses `gemini-3-pro-preview` (configurable) for high-accuracy transcription and translation.
+  2.  **Text-to-Speech**: Uses `gemini-2.5-pro-preview-tts` (configurable) to generate natural-sounding speech in the target language.
 - **Natural Translation**: leveraging advanced TTS capabilities to maintain a natural audible flow.
 - **Timestamp Alignment**: Automatically syncs the translated speech duration to match the original video/audio.
 - **Smart Chunking**: Handles long files by intelligently splitting based on silence.
@@ -53,8 +56,8 @@ Transform your audio content into any language with high accuracy and natural-so
    You can override the default models by setting environment variables in your `.env` file:
 
    ```bash
-   THINKING_MODEL=gemini-2.5-flash
-   TTS_MODEL=gemini-2.5-flash-preview-tts
+   THINKING_MODEL=gemini-3-pro-preview
+   TTS_MODEL=gemini-2.5-pro-preview-tts
    ```
 
 ## 🎙️ Usage

@@ -15,7 +15,7 @@ def translate(
     target_lang: str = typer.Option(..., "--lang", "-l", help="Target language (e.g., 'English', 'Spanish')."),
     output_path: Optional[Path] = typer.Option(None, "--output", "-o", help="Path to save the translated audio/video. Defaults to [input]_translated.[mp3|mp4]"),
     ducking: bool = typer.Option(False, "--ducking", "-d", help="Apply auto-ducking to mix translated voice with original background."),
-    voice: str = typer.Option("Kore", "--voice", help="TTS Voice (Puck, Charon, Kore, Fenrir, Aoede)"),
+    voice: str = typer.Option("Auto", "--voice", help="TTS Voice (Auto, Puck, Charon, Kore, Fenrir, Aoede)"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging.")
 ):
     """
@@ -26,9 +26,9 @@ def translate(
     # Setup Logging
     log_level = logging.INFO if verbose else logging.WARNING
     logging.basicConfig(
-        level=log_level, 
-        format="%(message)s", 
-        datefmt="[%X]", 
+        level=log_level,
+        format="%(message)s",
+        datefmt="[%X]",
         handlers=[RichHandler(markup=True)]
     )
     
@@ -37,7 +37,7 @@ def translate(
         Config.validate()
         
         # Validate Voice
-        allowed_voices = ["Puck", "Charon", "Kore", "Fenrir", "Aoede"]
+        allowed_voices = ["Auto", "Puck", "Charon", "Kore", "Fenrir", "Aoede"]
         if voice not in allowed_voices:
             typer.secho(f"Warning: '{voice}' is not a standard voice. Allowed: {allowed_voices}. Proceeding anyway...", fg=typer.colors.YELLOW)
 
