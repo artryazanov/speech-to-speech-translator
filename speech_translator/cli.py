@@ -1,6 +1,8 @@
 import typer
 import logging
 from rich.logging import RichHandler
+
+logger = logging.getLogger(__name__)
 from pathlib import Path
 from typing import Optional
 from speech_translator.orchestrator import TranslationOrchestrator
