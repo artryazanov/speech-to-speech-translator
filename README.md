@@ -1,10 +1,10 @@
 # Gemini Speech-to-Speech Translator
 
-[![CI](https://github.com/artryazanov/speech-to-speech-translator/actions/workflows/ci.yml/badge.svg)](https://github.com/artryazanov/speech-to-speech-translator/actions/workflows/ci.yml)
-[![Docker Build](https://github.com/artryazanov/speech-to-speech-translator/actions/workflows/docker-build.yml/badge.svg)](https://github.com/artryazanov/speech-to-speech-translator/actions/workflows/docker-build.yml)
-[![License](https://img.shields.io/github/license/artryazanov/speech-to-speech-translator)](LICENSE)
+[![CI](https://github.com/artryazanov/gemini-speech-to-speech-translator/actions/workflows/ci.yml/badge.svg)](https://github.com/artryazanov/gemini-speech-to-speech-translator/actions/workflows/ci.yml)
+[![Docker Build](https://github.com/artryazanov/gemini-speech-to-speech-translator/actions/workflows/docker-build.yml/badge.svg)](https://github.com/artryazanov/gemini-speech-to-speech-translator/actions/workflows/docker-build.yml)
+[![License](https://img.shields.io/github/license/artryazanov/gemini-speech-to-speech-translator)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
-[![codecov](https://codecov.io/gh/artryazanov/speech-to-speech-translator/graph/badge.svg?token=CODECOV_TOKEN)](https://codecov.io/gh/artryazanov/speech-to-speech-translator)
+[![codecov](https://codecov.io/gh/artryazanov/gemini-speech-to-speech-translator/graph/badge.svg?token=CODECOV_TOKEN)](https://codecov.io/gh/artryazanov/gemini-speech-to-speech-translator)
 
 
 Transform your audio content into any language with high accuracy and natural-sounding speech. Powered by Google Gemini Models.
@@ -29,8 +29,8 @@ Transform your audio content into any language with high accuracy and natural-so
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/artryazanov/speech-to-speech-translator.git
-   cd speech-to-speech-translator
+   git clone https://github.com/artryazanov/gemini-speech-to-speech-translator.git
+   cd gemini-speech-to-speech-translator
    ```
 
 2. Install dependencies:

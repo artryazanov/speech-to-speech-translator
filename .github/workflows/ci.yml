@@ -41,7 +41,7 @@ jobs:
       uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        slug: artryazanov/speech-to-speech-translator
+        slug: artryazanov/gemini-speech-to-speech-translator
         
   lint:
     runs-on: ubuntu-latest

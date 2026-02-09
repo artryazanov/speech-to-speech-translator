@@ -14,4 +14,4 @@ jobs:
     - uses: actions/checkout@v6
     
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag speech-translator:$(date +%s)
+      run: docker build . --file Dockerfile --tag gemini-speech-to-speech-translator:$(date +%s)

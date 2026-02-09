@@ -1,7 +1,7 @@
 [project]
-name = "speech-to-speech-translator"
+name = "gemini-speech-to-speech-translator"
 version = "0.1.0"
-description = "A Python tool to translate audio files while preserving voice and intonation using Gemini 2.5 Flash."
+description = "A Python tool to translate audio files while preserving voice and intonation using Google Gemini Models."
 authors = [
     {name = "Artem Ryazanov", email = "artryazanov@gmail.com"},
 ]
