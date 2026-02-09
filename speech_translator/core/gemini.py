@@ -181,7 +181,7 @@ class GeminiClient:
         # --- Step 2: Generate audio (TTS) ---
         return self._generate_tts(translated_text, selected_voice)
 
-    def _process_dialogue(self, audio_bytes: bytes, target_lang: str, duration_hint_sec: float) -> bytes:
+    def _process_dialogue(self, audio_bytes: bytes, target_lang: str, duration_hint_sec: Optional[float]) -> bytes:
         """
         Advanced handling for multiple speakers.
         1. Diarize & Translate -> List of segments.
@@ -405,3 +405,5 @@ class GeminiClient:
                          logger.warning(f"Failed with voice {voice_name}. Retrying one last time with fallback voice 'Kore'...")
                          return self._generate_tts(text, "Kore")
                     raise
+
+        raise ValueError("TTS generation failed unexpectedly")
