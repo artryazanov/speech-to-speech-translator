@@ -1,4 +1,4 @@
-# Speech-to-Speech Translator
+# Gemini Speech-to-Speech Translator
 
 [![CI](https://github.com/artryazanov/speech-to-speech-translator/actions/workflows/ci.yml/badge.svg)](https://github.com/artryazanov/speech-to-speech-translator/actions/workflows/ci.yml)
 [![Docker Build](https://github.com/artryazanov/speech-to-speech-translator/actions/workflows/docker-build.yml/badge.svg)](https://github.com/artryazanov/speech-to-speech-translator/actions/workflows/docker-build.yml)
