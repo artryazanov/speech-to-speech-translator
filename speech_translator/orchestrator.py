@@ -14,7 +14,7 @@ class TranslationOrchestrator:
         self.audio_processor = AudioProcessor()
         self.gemini_client = GeminiClient()
 
-    def process(self, input_path: str, output_path: str, target_lang: str, ducking: bool = False, voice_name: str = "Kore"):
+    def process(self, input_path: str, output_path: str, target_lang: str, ducking: bool = False, voice_name: str = "Kore", mode: str = "monologue"):
         """
         Main pipeline: Load -> Split -> Translate -> Merge -> (Broadcast/Duck) -> Save.
         """
@@ -85,13 +85,14 @@ class TranslationOrchestrator:
                     try:
                         # API Call
                         # We ask Gemini to match the duration of the chunk for sync
-                        logger.info(f"Sending audio chunk to Gemini. Size: {len(chunk)} bytes ({chunk_duration:.2f}s) - Attempt {attempt+1}")
+                        logger.info(f"Sending audio chunk to Gemini (Mode: {mode})...")
                         
                         translated_bytes = self.gemini_client.translate_audio(
                             str(temp_chunk_path), 
                             target_lang, 
                             duration_hint_sec=chunk_duration,
-                            voice_name=voice_name
+                            voice_name=voice_name,
+                            mode=mode
                         )
                         
                         # Write response to temp file to load back into pydub

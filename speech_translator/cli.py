@@ -3,11 +3,17 @@ import logging
 from rich.logging import RichHandler
 
 logger = logging.getLogger(__name__)
+from enum import Enum
 from pathlib import Path
 from typing import Optional
 from speech_translator.orchestrator import TranslationOrchestrator
 from speech_translator.config import Config
 from speech_translator.core.gemini import GeminiClient
+
+# Create Enum for modes
+class TranslationMode(str, Enum):
+    MONOLOGUE = "monologue"
+    DIALOGUE = "dialogue"
 
 app = typer.Typer(help="Speech-to-Speech Translator using Gemini models")
 
@@ -17,7 +23,8 @@ def translate(
     target_lang: str = typer.Option(..., "--lang", "-l", help="Target language (e.g., 'English', 'Spanish')."),
     output_path: Optional[Path] = typer.Option(None, "--output", "-o", help="Path to save the translated audio/video. Defaults to [input]_translated.[mp3|mp4]"),
     ducking: bool = typer.Option(False, "--ducking", "-d", help="Apply auto-ducking to mix translated voice with original background."),
-    voice: str = typer.Option("Auto", "--voice", help="TTS Voice (Auto, Puck, Charon, Kore, Fenrir, Aoede)"),
+    voice: str = typer.Option("Auto", "--voice", help="TTS Voice (Auto, Puck, Charon, Kore, Fenrir, Aoede). Ignored in Dialogue mode."),
+    mode: TranslationMode = typer.Option(TranslationMode.MONOLOGUE, "--mode", "-m", help="Processing mode: monologue (single speaker) or dialogue (multi-speaker detection)."),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging.")
 ):
     """
@@ -72,7 +79,8 @@ def translate(
             output_path=str(output_path),
             target_lang=target_lang,
             ducking=ducking,
-            voice_name=voice
+            voice_name=voice,
+            mode=mode.value
         )
         
         typer.secho(f"Success! Translation saved to {output_path}", fg=typer.colors.GREEN, bold=True)

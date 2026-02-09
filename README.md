@@ -9,14 +9,15 @@
 
 Transform your audio content into any language with high accuracy and natural-sounding speech. Powered by Google Gemini Models.
 
-> [!WARNING]
-> **Single Speaker Only**: This project is currently optimized for videos with a single speaker. Multi-speaker support with distinct voice assignment is experimental and may produce unexpected results.
+> [!NOTE]
+> **Modes**: The tool supports two modes: `monologue` (default, single voice) and `dialogue` (multi-speaker detection).
 
 ## 🚀 Features
 
 - **Hybrid STT+TTS Pipeline**: Utilizes a robust two-step process:
   1.  **Speech-to-Text & Translation**: Uses `gemini-3-pro-preview` (configurable) for high-accuracy transcription and translation.
   2.  **Text-to-Speech**: Uses `gemini-2.5-pro-preview-tts` (configurable) to generate natural-sounding speech in the target language.
+- **Dialogue Support**: (`--mode dialogue`) Detects multiple speakers and assigns distinct voices (Man, Woman, Boy, Girl, etc.) to each.
 - **Natural Translation**: leveraging advanced TTS capabilities to maintain a natural audible flow.
 - **Timestamp Alignment**: Automatically syncs the translated speech duration to match the original video/audio.
 - **Smart Chunking**: Handles long files by intelligently splitting based on silence.
@@ -98,6 +99,19 @@ python -m speech_translator.cli input.mp4 \
   --output custom_audio.mp3 \
   --ducking \
 ```
+
+### Dialogue Mode
+
+For content with multiple speakers (interviews, podcasts, movies), use the `dialogue` mode:
+
+```bash
+python -m speech_translator.cli interview.mp4 --lang "German" --mode dialogue
+```
+
+This will:
+1.  Diarize the audio to identify speakers.
+2.  Assign specific voices based on gender/age (e.g., *Fenrir* for men, *Kore* for women).
+3.  Stitch the segments back together.
 
 ### Docker Usage
 
